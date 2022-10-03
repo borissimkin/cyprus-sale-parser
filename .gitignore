@@ -1,0 +1,11 @@
+node_modules
+dist
+.env
+*.log
+.idea
+.env.production
+src/database.sqlite
+database.sqlite
+database.db
+src/database.db
+test_session

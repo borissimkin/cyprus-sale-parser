@@ -1,0 +1,1 @@
+export const LIMIT_LISTENING_WORDS_USER = 10
