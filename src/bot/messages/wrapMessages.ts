@@ -1,7 +1,7 @@
 import {errorOperationEmoji, successOperationEmoji} from "@/bot/messages/emojis";
 
 const addEmojiToText = (text: string, emoji: string): string => {
-    return text ? `${emoji}${text}` : text
+    return text ? `${emoji} ${text}` : text
 }
 
 export const wrapSuccessMessage = (text: string): string => {

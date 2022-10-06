@@ -1,8 +1,11 @@
-import {User, UserRepository} from "@/database";
+import {ListeningWord, User, UserRepository} from "@/database";
 import fuzzy from "fuzzy"
 import {bot} from "@/bot";
 import {NewMessageEvent} from "telegram/events";
 import {getUrlParsedChat} from "@/telegramClient/utils";
+import {Markup} from "telegraf";
+import {InlineActions} from "@/bot/inlineActions";
+import {getDeleteWordKeyboard} from "@/bot/keyboards/getDeleteWordKeyboard";
 
 // todo: оптимизировать алгоритм
 // todo: не делать запросы при каждом хендле сообщения
@@ -25,24 +28,24 @@ export const handleMessageFromParsedChat = async (message: NewMessageEvent) => {
         for (const word of listeningWords) {
             const isMatched = isMatchedMessage(word.word, text)
             if (isMatched) {
-                sendMessageMatched(user, {id: message.message.id, text}, word.word)
+                sendMessageMatched(user, {id: message.message.id, text}, word)
                 break
             }
         }
     })
 }
 
-const sendMessageMatched = (user: User, message: Message,  word: string) => {
-    // todo: кнопка отписаться
-    return bot.telegram.sendMessage(user.telegramId, createMatchedMessageText(word, message))
+const sendMessageMatched = (user: User, message: Message, word: ListeningWord) => {
+    return bot.telegram.sendMessage(user.telegramId, createMatchedMessageText(word.word, message),
+        {...Markup.inlineKeyboard(getDeleteWordKeyboard(word))})
 }
 
 
 const createMatchedMessageText = (word: string, message: Message) => {
-    const baseText = `👀${word}\n\n🔗${getUrlToMessage(message.id)}\n`
+    const baseText = `👀 ${word}\n\n🔗 ${getUrlToMessage(message.id)}\n`
 
     if (message.text) {
-        return `${baseText}\n🗒Описание:\n${message.text}`
+        return `${baseText}\n🗒 Описание:\n${message.text}`
     }
     return baseText
 }

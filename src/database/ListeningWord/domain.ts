@@ -21,3 +21,8 @@ export const removeListeningWord = async (listeningWord: ListeningWord) => {
     const repo = ListeningWordRepository()
     return repo.remove(listeningWord)
 }
+
+export const getListeningWordById = async (id: number) => {
+    const repo = ListeningWordRepository()
+    return repo.findOne({where: { id }})
+}
