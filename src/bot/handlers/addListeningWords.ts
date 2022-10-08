@@ -18,7 +18,7 @@ const addListeningWordsToDatabase = async (ctx: Context, text: string, user: Use
     const words = getWordsFromMessage(text)
     const uniqueWords = getUniqueWords(user, words)
     if (!uniqueWords.length) {
-        await ctx.reply("Вы ввели слова, которые вы уже прослушиваете.")
+        await ctx.reply("Вы ввели слова, которые вы уже отслеживаете.")
         return
     }
     const allowedByLimitWords = filterWordsByLimitAllows(user, uniqueWords)
