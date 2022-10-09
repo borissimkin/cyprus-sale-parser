@@ -1,6 +1,6 @@
 import {Context} from "telegraf";
-import {createUserIfNotExist, findUserByTelegramId} from "@/database";
-import {newUserRegistrationHandler} from "@/bot/handlers/newUserRegistrationHandler";
+import {createUserIfNotExist, findUserByTelegramId, toUnblockedUser} from "@/database";
+import {newUserRegistrationHandler, unblockUserHandler} from "@/bot/handlers/newUserRegistrationHandler";
 import {getChatLinkForParse} from "@/bot/utils/getChatLinkForParse";
 import {helpAddListeningWordMessage, listOfAllowedCommands} from "@/bot/messages/helpMessage";
 
@@ -11,10 +11,16 @@ ${listOfAllowedCommands}`
 //todo: написать инструкцию
 export const startHandler = async (ctx: Context) => {
     const telegramId = ctx.from.id
-    if (!await findUserByTelegramId(telegramId)) {
+    const user = await findUserByTelegramId(telegramId)
+    if (!user) {
         newUserRegistrationHandler(ctx)
+        await createUserIfNotExist(telegramId)
+    } else {
+        if (user.isBlocked) {
+            await toUnblockedUser(user)
+            unblockUserHandler(ctx)
+        }
     }
-    await createUserIfNotExist(telegramId)
     return ctx.reply(startMessage, {parse_mode: "Markdown"})
 }
 

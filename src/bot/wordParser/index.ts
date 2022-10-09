@@ -1,10 +1,11 @@
-import {ListeningWord, User, UserRepository} from "@/database";
+import {ListeningWord, toBlockedUser, User, UserRepository} from "@/database";
 import fuzzy from "fuzzy"
 import {bot} from "@/bot";
 import {NewMessageEvent} from "telegram/events";
 import {getUrlParsedChat} from "@/telegramClient/utils";
 import {Markup} from "telegraf";
 import {getDeleteWordKeyboard} from "@/bot/keyboards/getDeleteWordKeyboard";
+import {IsNull} from "typeorm";
 
 // todo: оптимизировать алгоритм
 // todo: не делать запросы при каждом хендле сообщения
@@ -20,8 +21,7 @@ export const handleMessageFromParsedChat = async (message: NewMessageEvent) => {
         return
     }
     const userRepository = UserRepository()
-    // todo: isBlocked: false
-    const users = await userRepository.find({relations: ['listeningWords']})
+    const users = await userRepository.find({where: {isBlocked: IsNull()}, relations: ['listeningWords']})
     users.forEach((user) => {
         const listeningWords = user?.listeningWords ?? []
         for (const word of listeningWords) {
@@ -34,9 +34,16 @@ export const handleMessageFromParsedChat = async (message: NewMessageEvent) => {
     })
 }
 
-const sendMessageMatched = (user: User, message: Message, word: ListeningWord) => {
-    return bot.telegram.sendMessage(user.telegramId, createMatchedMessageText(word.word, message),
-        {...Markup.inlineKeyboard(getDeleteWordKeyboard(word))})
+const sendMessageMatched = async (user: User, message: Message, word: ListeningWord) => {
+    try {
+        await bot.telegram.sendMessage(user.telegramId, createMatchedMessageText(word.word, message),
+            {...Markup.inlineKeyboard(getDeleteWordKeyboard(word))})
+    } catch (e) {
+        if (e?.response?.error_code === 403) {
+            await toBlockedUser(user)
+        }
+    }
+
 }
 
 

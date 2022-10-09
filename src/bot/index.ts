@@ -61,8 +61,6 @@ bot.command("database", sendDatabaseFileHandler)
 bot.hears(new RegExp('/delete_\\d+'), (ctx) => deleteListeningWordHandler(ctx, ctx.message.text))
 bot.on('text', (ctx) => addListeningWordsHandler(ctx, ctx.message.text))
 
-// todo: валидировать длину слова (50) проверить длину возможного слова на воостановление
-
 bot.action(/^restore-(.*?)$/, async (ctx) => {
     const matchedWord = ctx.match[1]
     if (!matchedWord) {

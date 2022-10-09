@@ -8,14 +8,29 @@ export const newUserRegistrationHandler = (ctx: Context) => {
         const telegramUser = ctx.from
         const name = getUserName(telegramUser)
         const adminId = getAdminId()
-        return ctx.telegram.sendMessage(adminId, getText(name))
+        return ctx.telegram.sendMessage(adminId, getTextNewUser(name))
     } catch {
         loggerHandleError("Не удалось отправить сообщение о новом зарегистрированном пользователе")
     }
 }
 
-const getText = (name: string | number) => {
+export const unblockUserHandler = (ctx: Context) => {
+    try {
+        const telegramUser = ctx.from
+        const name = getUserName(telegramUser)
+        const adminId = getAdminId()
+        return ctx.telegram.sendMessage(adminId, getTextUnblockedUser(name))
+    } catch {
+        loggerHandleError("Не удалось отправить сообщение о разблокированном пользователе")
+    }
+}
+
+const getTextNewUser = (name: string | number) => {
     return `👤 Зарегистировался новый пользователь🥺 - ${name}`
+}
+
+const getTextUnblockedUser = (name: string | number) => {
+    return `😁 Пользователь ${name} вернулся в родную гавань.`
 }
 
 const getUserName = (user: Context['from']) => {
