@@ -1,4 +1,4 @@
-import {Telegraf} from "telegraf";
+import {Markup, Telegraf} from "telegraf";
 import {startHandler} from "@/bot/handlers/start";
 import {helpHandler} from "@/bot/handlers/help";
 import {addListeningWordsHandler} from "@/bot/handlers/addListeningWords";
@@ -26,7 +26,10 @@ import {
     createListListeningWordWithoutDeleteCommand
 } from "@/bot/utils/createListListeningWords";
 import {getRestoreWordsKeyboard} from "@/bot/keyboards/getRestoreWordsKeyboard";
-import {getDeleteListWordsKeyboard} from "@/bot/keyboards/getDeleteListWordsKeyboard";
+import {
+    getConfirmDeleteListWordsKeyboard,
+    getDeleteListWordsKeyboard
+} from "@/bot/keyboards/getDeleteListWordsKeyboard";
 
 const token = process.env.BOT_TOKEN
 const adminId = getAdminId()
@@ -59,8 +62,6 @@ bot.on('text', (ctx) => addListeningWordsHandler(ctx, ctx.message.text))
 //TODO: тест поперечный (поперечного
 // todo: валидировать ввод от мусора (/)
 // todo: валидировать длину слова (50) проверить длину возможного слова на воостановление
-
-// todo: убрать возможность восстановить список, вместо этого подтверждение ВЫ ТОЧНО ХОИТТЕ УДАЛИТЬ (да нет)
 
 bot.action(/^restore-(.*?)$/, async (ctx) => {
     const matchedWord = ctx.match[1]
@@ -107,45 +108,6 @@ bot.action(/^delete-(\d+)$/, async (ctx) => {
         return ctx.answerCbQuery(errorMessageCallbackQuery)
     }
 })
-//
-// bot.action(/^list-restore-(.*?)$/, async (ctx) => {
-//     const stringWords = ctx.match[1]
-//     const telegramId = ctx.from.id
-//     if (!stringWords) {
-//         return ctx.answerCbQuery(errorMessageCallbackQuery)
-//     }
-//     const user = await findUserByTelegramId(telegramId)
-//     if (!user) {
-//         loggerHandleError(`list-restore не найден пользователь ${telegramId}`)
-//         return
-//     }
-//     try {
-//         const words: string[] = JSON.parse(stringWords)
-//         if (!words?.length) {
-//             ctx.editMessageText("Не удалось восстановить слова 😨")
-//             ctx.editMessageReplyMarkup(undefined)
-//             return
-//         }
-//         const uniqueWords = getUniqueWords(user, words)
-//         if (!uniqueWords.length) {
-//             ctx.editMessageReplyMarkup(undefined)
-//             return ctx.answerCbQuery(`🧐 Вы уже отслеживаете все эти слова!`)
-//         }
-//         const allowedByLimitWords = filterWordsByLimitAllows(user, uniqueWords)
-//         if (!allowedByLimitWords.length) {
-//             return ctx.answerCbQuery(wrapErrorMessage(listeningWordsLimitExceededMessage(LIMIT_LISTENING_WORDS_USER)))
-//         }
-//         const newWords = await addUniqueListeningWords(allowedByLimitWords, user)
-//         const wordList = createListListeningWords(newWords)
-//
-//         ctx.answerCbQuery(wrapSuccessMessage("Список восстановлен!"))
-//         ctx.editMessageText(`Вы восстановили слова (${newWords.length}):\n${wordList}`)
-//         return ctx.editMessageReplyMarkup({inline_keyboard: [getDeleteListWordsKeyboard()]})
-//     } catch (e) {
-//         loggerHandleError(`list-restore  telegramId=${telegramId} stringWords=${stringWords} ${e}` )
-//         ctx.answerCbQuery(wrapErrorMessage(`Произошла ошибка`))
-//     }
-// })
 
 bot.action(/^list-delete-confirm-yes$/, async (ctx) => {
     const telegramId = ctx.from.id
@@ -155,9 +117,7 @@ bot.action(/^list-delete-confirm-yes$/, async (ctx) => {
     }
     const words = user.listeningWords
     if (!words.length) {
-        ctx.editMessageReplyMarkup(undefined)
-        ctx.editMessageText("У вас нет отслеживаемых слов 🤨")
-        return
+        return ctx.editMessageText("У вас нет отслеживаемых слов 🤨")
     }
     try {
         const removedWords = await removeListeningListWords(words)
@@ -170,7 +130,33 @@ bot.action(/^list-delete-confirm-yes$/, async (ctx) => {
 })
 
 bot.action(/^list-delete-confirm-no$/, async (ctx) => {
-    ctx.editMessageReplyMarkup({inline_keyboard: [getDeleteListWordsKeyboard()]})
+    const telegramId = ctx.from.id
+    const user = await findUserByTelegramId(telegramId)
+    if (!user) {
+        return
+    }
+    const words = user.listeningWords
+    if (!words.length) {
+        return ctx.editMessageText("У вас нет отслеживаемых слов 🤨")
+    }
+    const message = `Список отслеживаемых слов (${words.length}):\n${createListListeningWords(words)}`
+    await ctx.editMessageText(message)
+    await  ctx.editMessageReplyMarkup({inline_keyboard: [getDeleteListWordsKeyboard()]})
+})
+
+bot.action(/^list-delete$/, async (ctx) => {
+    const telegramId = ctx.from.id
+    const user = await findUserByTelegramId(telegramId)
+    if (!user) {
+        return
+    }
+    const words = user.listeningWords
+    if (!words.length) {
+        return ctx.editMessageText("У вас нет отслеживаемых слов 🤨")
+    }
+    const listText = createListListeningWordWithoutDeleteCommand(words)
+    await ctx.editMessageText(`Вы уверены, что хотите очистить весь список слов (${words.length})?:\n${listText}`)
+    await ctx.editMessageReplyMarkup({inline_keyboard: [getConfirmDeleteListWordsKeyboard()]})
 })
 
 /**
