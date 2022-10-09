@@ -30,6 +30,7 @@ import {
     getConfirmDeleteListWordsKeyboard,
     getDeleteListWordsKeyboard
 } from "@/bot/keyboards/getDeleteListWordsKeyboard";
+import {sendDatabaseFileHandler} from "@/bot/handlers/sendDatabaseFile";
 
 const token = process.env.BOT_TOKEN
 const adminId = getAdminId()
@@ -56,11 +57,10 @@ export const bot = new Telegraf(process.env.BOT_TOKEN)
 bot.start(startHandler);
 bot.help(helpHandler);
 bot.command('list', listListeningWordHandler);
+bot.command("database", sendDatabaseFileHandler)
 bot.hears(new RegExp('/delete_\\d+'), (ctx) => deleteListeningWordHandler(ctx, ctx.message.text))
 bot.on('text', (ctx) => addListeningWordsHandler(ctx, ctx.message.text))
 
-//TODO: тест поперечный (поперечного
-// todo: валидировать ввод от мусора (/)
 // todo: валидировать длину слова (50) проверить длину возможного слова на воостановление
 
 bot.action(/^restore-(.*?)$/, async (ctx) => {
