@@ -10,15 +10,28 @@ import {filterWordsByLimitAllows} from "@/bot/utils/limitListenningWords";
 import {listeningWordsLimitExceededMessage} from "@/bot/messages/listeningWordsLimitExceededMessage";
 import {LIMIT_LISTENING_WORDS_USER} from "@/bot/constants";
 
+const regex = RegExp(/^[a-z0-9а-яёЁА-ЯA-Z -]+$/i)
+
 const getWordsFromMessage = (text: string, separator = ",") => {
     return _.uniq(text.toLowerCase().split(separator).map((word) => word.trim()))
 }
 
+const sanitizeWord = (word: string): boolean => {
+    return regex.test(word)
+}
+/**
+ *
+ * */
 const addListeningWordsToDatabase = async (ctx: Context, text: string, user: User):  Promise<ListeningWord[] | undefined> => {
     const words = getWordsFromMessage(text)
+    const sanitizedWords = words.filter(sanitizeWord).filter(Boolean)
+    if (!sanitizedWords.length) {
+        await ctx.reply("Неправильный ввод. Разрешены только буквы и цифры 🤓")
+        return
+    }
     const uniqueWords = getUniqueWords(user, words)
     if (!uniqueWords.length) {
-        await ctx.reply("Вы ввели слова, которые вы уже отслеживаете.")
+        await ctx.reply("🤨 Вы ввели слова, которые вы уже отслеживаете.")
         return
     }
     const allowedByLimitWords = filterWordsByLimitAllows(user, uniqueWords)

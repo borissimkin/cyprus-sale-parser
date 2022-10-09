@@ -4,7 +4,6 @@ import {bot} from "@/bot";
 import {NewMessageEvent} from "telegram/events";
 import {getUrlParsedChat} from "@/telegramClient/utils";
 import {Markup} from "telegraf";
-import {InlineActions} from "@/bot/inlineActions";
 import {getDeleteWordKeyboard} from "@/bot/keyboards/getDeleteWordKeyboard";
 
 // todo: оптимизировать алгоритм

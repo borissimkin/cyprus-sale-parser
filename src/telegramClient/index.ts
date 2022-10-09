@@ -33,7 +33,6 @@ export const startTelegramClientParser = async () => {
     console.log("Telegram Client is running");
 
     async function handler(event: NewMessageEvent) {
-        console.log(event)
         return handleMessageFromParsedChat(event)
     }
     client.addEventHandler(handler, new NewMessage({incoming: true, outgoing: true, chats: [chatId]}));
