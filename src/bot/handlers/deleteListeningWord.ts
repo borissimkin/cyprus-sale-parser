@@ -21,7 +21,6 @@ export const deleteListeningWordHandler = async (ctx: Context, text: string) => 
             return sendMessageListeningWordNotFound(ctx)
         }
         await removeListeningWord(listeningWord);
-        console.log({listeningWord})
         await sendSuccessMessage(ctx, listeningWord.word)
 
     } catch (e) {
