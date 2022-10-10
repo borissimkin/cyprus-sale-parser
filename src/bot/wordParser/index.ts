@@ -15,9 +15,13 @@ type Message = {
     text?: string
 }
 
+const isHelloMessage = (message: string) => {
+    return message.includes("Для удобного пользования группой ознакомьтесь")
+}
+
 export const handleMessageFromParsedChat = async (message: NewMessageEvent) => {
     const text = message.message.text
-    if (!text) {
+    if (!text || isHelloMessage(text)) {
         return
     }
     const userRepository = UserRepository()
