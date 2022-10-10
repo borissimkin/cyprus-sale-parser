@@ -31,23 +31,27 @@ export const handleMessageFromParsedChat = async (message: NewMessageEvent) => {
     users.forEach((user) => {
         const listeningWords = user?.listeningWords ?? []
         for (const word of listeningWords) {
-            const isMatched = isMatchedMessageAndReturnProcessedMessage(word.word, text, messageAsArray)
-            if (isMatched) {
-                sendMessageMatched(user, {id: message.message.id, text}, word)
-                break
+            const isMatchedMessage = isMatchedMessageAndReturnProcessedMessage(word.word, text, messageAsArray)
+            if (isMatchedMessage) {
+                sendMessageMatched(user, {id: message.message.id, text: isMatchedMessage}, word, text)
+                return
             }
         }
     })
 }
 
-const sendMessageMatched = async (user: User, message: Message, word: ListeningWord) => {
+const sendMessageMatched = async (user: User, message: Message, word: ListeningWord, rawText: string) => {
     try {
         await bot.telegram.sendMessage(user.telegramId, createMatchedMessageText(word.word, message),
-            {...Markup.inlineKeyboard(getDeleteWordKeyboard(word))})
+            {...Markup.inlineKeyboard(getDeleteWordKeyboard(word)), parse_mode: "HTML"})
     } catch (e) {
         if (e?.response?.error_code === 403) {
             await toBlockedUser(user)
-        } else {
+        } else if (e?.response?.error_code === 400) {
+            await bot.telegram.sendMessage(user.telegramId, createMatchedMessageText(word.word, {id: message.id, text: rawText}),
+                {...Markup.inlineKeyboard(getDeleteWordKeyboard(word))})
+        }
+        else {
             loggerHandleError(e?.message || "Не удалось отправить sendMessageMatched")
         }
     }
@@ -113,7 +117,7 @@ export const isMatchedMessageAndReturnProcessedMessage = (word: string, message:
 
 const processMessageWithFindedWord = (indexFindedWord: number, messageAsArray: string[]) => {
     const array = [...messageAsArray]
-    array[indexFindedWord] = `*${array[indexFindedWord]}*`
+    array[indexFindedWord] = `<b>${array[indexFindedWord]}</b>`
     return array.join(" ")
 }
 
