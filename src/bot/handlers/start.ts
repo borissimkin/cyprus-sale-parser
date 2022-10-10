@@ -8,7 +8,6 @@ const startMessage = `🦾 Бот помогает оперативно отсл
 ${helpAddListeningWordMessage}
 ${listOfAllowedCommands}`
 
-//todo: написать инструкцию
 export const startHandler = async (ctx: Context) => {
     const telegramId = ctx.from.id
     const user = await findUserByTelegramId(telegramId)
