@@ -15,6 +15,9 @@ export class User {
     @CreateDateColumn()
     createdAt: Date;
 
+    @Column({nullable: true})
+    isPremium: boolean
+
     @UpdateDateColumn()
     updatedAt: Date;
 }

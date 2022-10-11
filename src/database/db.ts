@@ -8,6 +8,7 @@ export const AppDataSource = new DataSource({
     database: "src/database.sqlite",
     entities: [User, ListeningWord],
     synchronize: true,
+    migrationsRun: true,
 })
 
 export const initDatabase = () => {
