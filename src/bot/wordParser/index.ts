@@ -5,8 +5,8 @@ import {getUrlParsedChat} from "@/telegramClient/utils";
 import {Markup} from "telegraf";
 import {getDeleteWordKeyboard} from "@/bot/keyboards/getDeleteWordKeyboard";
 import {IsNull} from "typeorm";
-import levenshtein from 'js-levenshtein';
 import {loggerHandleError} from "@/logger";
+import {distance} from "fastest-levenshtein"
 
 // todo: оптимизировать алгоритм
 // todo: не делать запросы при каждом хендле сообщения
@@ -91,7 +91,7 @@ export const isMatchedMessageAndReturnProcessedMessage = (word: string, message:
         index: null
     }
     for (const [i, value] of messageAsArray.entries()) {
-        const curLeven = levenshtein(word, value)
+        const curLeven = distance(word, value)
         if (curLeven === 0) {
             temp.index = i
             temp.isSmallestLevenstein = curLeven
