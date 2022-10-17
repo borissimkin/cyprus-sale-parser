@@ -16,8 +16,14 @@ type Message = {
     text?: string
 }
 
+const separator = " "
+
 const isHelloMessage = (message: string) => {
     return message.includes("Для удобного пользования группой ознакомьтесь")
+}
+
+const getWordLength = (word: string) => {
+    return word.split(separator).length
 }
 
 export const handleMessageFromParsedChat = async (message: NewMessageEvent) => {
@@ -27,7 +33,7 @@ export const handleMessageFromParsedChat = async (message: NewMessageEvent) => {
     }
     const userRepository = UserRepository()
     const users = await userRepository.find({where: {isBlocked: IsNull()}, relations: ['listeningWords']})
-    const messageAsArray = text.split(" ")
+    const messageAsArray = text.split(separator)
     users.forEach((user) => {
         const listeningWords = user?.listeningWords ?? []
         for (const word of listeningWords) {
@@ -80,11 +86,12 @@ const getMaxLevenstein = (word: string) => {
 
 
 export const isMatchedMessageAndReturnProcessedMessage = (word: string, message: string, messageAsArray: string[]) => {
-    // const index = getIncludesIndex(word, messageAsArray)
-    // const lengthLevenstein = getMaxLevenstein(word)
-    // if (index !== -1) {
-    //     return processMessageWithFindedWord(index, messageAsArray)
-    // }
+    const countWordsInWord = getWordLength(word)
+    if (countWordsInWord > 1) {
+        const searchResult = message.toLowerCase().search(word.toLowerCase())
+        return searchResult > -1 ? message : false
+    }
+
     const maxLevenstein = getMaxLevenstein(word)
     const temp = {
         isSmallestLevenstein: null,
@@ -118,7 +125,7 @@ export const isMatchedMessageAndReturnProcessedMessage = (word: string, message:
 const processMessageWithFindedWord = (indexFindedWord: number, messageAsArray: string[]) => {
     const array = [...messageAsArray]
     array[indexFindedWord] = `<b>${array[indexFindedWord]}</b>`
-    return array.join(" ")
+    return array.join(separator)
 }
 
 // const getIncludesIndex = (word: string, arrayWords: string[]) => {
@@ -143,7 +150,7 @@ const processMessageWithFindedWord = (indexFindedWord: number, messageAsArray: s
 //     const WORDS = ['лимассол', 'скутер', 'самокат', 'айфон']
 //
 //     WORDS.forEach((value) => {
-//         const result = isMatchedMessageAndReturnProcessedMessage(value, TEST_MESSAGE, TEST_MESSAGE.split(" "))
+//         const result = isMatchedMessageAndReturnProcessedMessage(value, TEST_MESSAGE, TEST_MESSAGE.split(separator))
 //         console.log(result);
 //     })
 // }
