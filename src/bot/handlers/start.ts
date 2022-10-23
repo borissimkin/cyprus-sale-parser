@@ -1,11 +1,9 @@
 import {Context} from "telegraf";
 import {createUserIfNotExist, findUserByTelegramId, toUnblockedUser} from "@/database";
 import {newUserRegistrationHandler, unblockUserHandler} from "@/bot/handlers/newUserRegistrationHandler";
-import {helpAddListeningWordMessage, listOfAllowedCommands} from "@/bot/messages/helpMessage";
+import {getHelpMessage} from "@/bot/handlers/help";
 
-const startMessage = `🦾 Бот помогает оперативно отслеживать нужные товары и услуги из чатов барахолок Кипра.\n
-${helpAddListeningWordMessage}
-${listOfAllowedCommands}`
+const startMessage = `🦾 <b>Бот помогает оперативно отслеживать нужные товары и услуги из чатов барахолок Кипра.</b>\n`
 
 export const startHandler = async (ctx: Context) => {
     const telegramId = ctx.from.id
@@ -19,6 +17,6 @@ export const startHandler = async (ctx: Context) => {
             unblockUserHandler(ctx)
         }
     }
-    return ctx.replyWithHTML(startMessage, {disable_web_page_preview: true })
+    return ctx.replyWithHTML(`${startMessage}\n${getHelpMessage()}`, {disable_web_page_preview: true })
 }
 
