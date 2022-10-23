@@ -6,6 +6,7 @@ import {getDeleteWordKeyboard} from "@/bot/keyboards/getDeleteWordKeyboard";
 import {IsNull} from "typeorm";
 import {loggerHandleError} from "@/logger";
 import {distance} from "fastest-levenshtein"
+import {isSomeNotImportantMessage} from "@/bot/wordParser/isSomeNotImportantMessage";
 
 // todo: оптимизировать алгоритм
 // todo: не делать запросы при каждом хендле сообщения
@@ -18,17 +19,13 @@ type Message = {
 
 const separator = " "
 
-const isHelloMessage = (message: string) => {
-    return message.includes("Для удобного пользования группой ознакомьтесь")
-}
-
 const getWordLength = (word: string) => {
     return word.split(separator).length
 }
 
 export const handleMessageFromParsedChat = async (message: NewMessageEvent, urlChatId: string) => {
     const text = message.message.text
-    if (!text || isHelloMessage(text)) {
+    if (!text || isSomeNotImportantMessage(text)) {
         return
     }
     const userRepository = UserRepository()
