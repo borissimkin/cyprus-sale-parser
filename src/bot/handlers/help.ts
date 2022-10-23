@@ -9,5 +9,5 @@ import {
 
 
 export const helpHandler = (ctx: Context) => {
-    return ctx.reply(`${helpAddListeningWordMessage}\n${someAdditionalInfo}\n\n${listOfAllowedCommands}\n\n${feedbackMessage}\n\n${chatsForParseMessage()}`, {parse_mode: "Markdown"})
+    return ctx.replyWithHTML(`${helpAddListeningWordMessage}\n${someAdditionalInfo}\n\n${listOfAllowedCommands}\n\n${feedbackMessage}\n\n${chatsForParseMessage()}`, {disable_web_page_preview: true })
 }

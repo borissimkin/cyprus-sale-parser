@@ -19,6 +19,6 @@ export const startHandler = async (ctx: Context) => {
             unblockUserHandler(ctx)
         }
     }
-    return ctx.reply(startMessage, {parse_mode: "Markdown"})
+    return ctx.replyWithHTML(startMessage, {disable_web_page_preview: true })
 }
 
