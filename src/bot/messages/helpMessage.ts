@@ -4,6 +4,6 @@ export const helpAddListeningWordMessage = "Чтобы отслеживать о
 export const listOfAllowedCommands = "*Доступные команды:\n*/list - Показать список ваших отслеживаемых слов.\n" +
     "/help - Информация об использовании бота."
 
-export const someAdditionalInfo = "*При вводе отслеживаемых слов не регистр не учитывается.*"
+export const someAdditionalInfo = "*При вводе отслеживаемых слов регистр не учитывается.*"
 
-export const feedbackMessage = "Для обратной связи пишите на почту *cyprus.sale.bot@gmail.com*"
+export const feedbackMessage = "Для обратной связи или сотрудничества пишите на почту *cyprus.sale.bot@gmail.com*"

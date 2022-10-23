@@ -6,11 +6,11 @@ import { StoreSession } from "telegram/sessions";
 import input from "input";
 import {NewMessage, NewMessageEvent} from "telegram/events";
 import {handleMessageFromParsedChat} from "@/bot/wordParser";
-import {getUrlParsedChat} from "@/telegramClient/utils";
+import {getUrlParsedChats} from "@/telegramClient/utils";
 
 const apiId = process.env.API_ID;
 const apiHash = process.env.API_HASH;
-const chatId = getUrlParsedChat()
+const chatId = getUrlParsedChats()
 
 
 if ([apiHash, apiId, chatId].some((x) =>!x)) {
@@ -32,8 +32,11 @@ export const startTelegramClientParser = async () => {
     client.session.save() // Save this string to avoid logging in again
     console.log("Telegram Client is running");
 
-    async function handler(event: NewMessageEvent) {
-        return handleMessageFromParsedChat(event)
+    async function handler(event: NewMessageEvent, urlChatId: string) {
+        return handleMessageFromParsedChat(event, urlChatId)
     }
-    client.addEventHandler(handler, new NewMessage({incoming: true, outgoing: true, chats: [chatId]}));
+    console.log(chatId)
+    chatId.forEach((id) => {
+        client.addEventHandler((event) => handler(event, id), new NewMessage({incoming: true, outgoing: true, chats: [id]}));
+    })
 }
