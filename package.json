@@ -41,7 +41,8 @@
     "watch-js": "nodemon dist/app.js",
     "postinstall": "tsc",
     "deploy": "git add . && git commit -m Heroku && git push heroku master",
-    "test": "jest"
+    "test": "jest",
+    "generate:test-db": "yarn build-ts && node dist/test/index.js"
   },
   "_moduleAliases": {
     "@": "dist"
