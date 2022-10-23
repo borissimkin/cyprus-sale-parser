@@ -5,7 +5,8 @@ const infoMessages: string[] = [
     "Подобные ФОРУМЫ / чаты у нас по",
     "нужно указывать цену,город, краткое описание. Если отдаете, указывайте, что",
     "Прочитайте правила закреплённые сверху",
-    "За не соблюдение правил бан"
+    "За не соблюдение правил бан",
+    "you were banned"
 ].map((info) => info.toLowerCase())
 
 export const isSomeNotImportantMessage = (text: string) => {
