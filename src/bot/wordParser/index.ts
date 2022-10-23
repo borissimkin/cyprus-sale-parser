@@ -1,7 +1,6 @@
 import {ListeningWord, toBlockedUser, User, UserRepository} from "@/database";
 import {bot} from "@/bot";
 import {NewMessageEvent} from "telegram/events";
-import {getUrlParsedChat} from "@/telegramClient/utils";
 import {Markup} from "telegraf";
 import {getDeleteWordKeyboard} from "@/bot/keyboards/getDeleteWordKeyboard";
 import {IsNull} from "typeorm";
@@ -14,6 +13,7 @@ import {distance} from "fastest-levenshtein"
 type Message = {
     id: number,
     text?: string
+    chatId: string
 }
 
 const separator = " "
@@ -26,7 +26,7 @@ const getWordLength = (word: string) => {
     return word.split(separator).length
 }
 
-export const handleMessageFromParsedChat = async (message: NewMessageEvent) => {
+export const handleMessageFromParsedChat = async (message: NewMessageEvent, urlChatId: string) => {
     const text = message.message.text
     if (!text || isHelloMessage(text)) {
         return
@@ -39,7 +39,7 @@ export const handleMessageFromParsedChat = async (message: NewMessageEvent) => {
         for (const word of listeningWords) {
             const isMatchedMessage = isMatchedMessageAndReturnProcessedMessage(word.word, text, messageAsArray)
             if (isMatchedMessage) {
-                sendMessageMatched(user, {id: message.message.id, text: isMatchedMessage}, word, text)
+                sendMessageMatched(user, {id: message.message.id, text: isMatchedMessage, chatId: urlChatId}, word, text)
                 return
             }
         }
@@ -54,7 +54,7 @@ const sendMessageMatched = async (user: User, message: Message, word: ListeningW
         if (e?.response?.error_code === 403) {
             await toBlockedUser(user)
         } else if (e?.response?.error_code === 400) {
-            await bot.telegram.sendMessage(user.telegramId, createMatchedMessageText(word.word, {id: message.id, text: rawText}),
+            await bot.telegram.sendMessage(user.telegramId, createMatchedMessageText(word.word, {id: message.id, text: rawText, chatId: message.chatId}),
                 {...Markup.inlineKeyboard(getDeleteWordKeyboard(word))})
         }
         else {
@@ -66,7 +66,7 @@ const sendMessageMatched = async (user: User, message: Message, word: ListeningW
 
 
 const createMatchedMessageText = (word: string, message: Message) => {
-    const baseText = `👀 ${word}\n\n🔗 ${getUrlToMessage(message.id)}\n`
+    const baseText = `👀 ${word}\n\n🔗 ${getUrlToMessage(message.id, message.chatId)}\n`
 
     if (message.text) {
         return `${baseText}\n🗒 Описание:\n${message.text}`
@@ -74,8 +74,8 @@ const createMatchedMessageText = (word: string, message: Message) => {
     return baseText
 }
 
-export const getUrlToMessage = (messageId: number) => {
-    return `${getUrlParsedChat()}/${messageId}`
+export const getUrlToMessage = (messageId: number, chatId: string) => {
+    return `${chatId}/${messageId}`
 }
 
 const percentOfLevenstein = 30

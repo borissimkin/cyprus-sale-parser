@@ -1,10 +1,9 @@
 import {Context} from "telegraf";
 import {createUserIfNotExist, findUserByTelegramId, toUnblockedUser} from "@/database";
 import {newUserRegistrationHandler, unblockUserHandler} from "@/bot/handlers/newUserRegistrationHandler";
-import {getChatLinkForParse} from "@/bot/utils/getChatLinkForParse";
 import {helpAddListeningWordMessage, listOfAllowedCommands} from "@/bot/messages/helpMessage";
 
-const startMessage = `🦾 Бот помогает оперативно отслеживать нужные товары и услуги из чата [CypRus Барахолка](${getChatLinkForParse()}).\n
+const startMessage = `🦾 Бот помогает оперативно отслеживать нужные товары и услуги из чатов барахолок Кипра.\n
 ${helpAddListeningWordMessage}
 ${listOfAllowedCommands}`
 
