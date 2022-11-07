@@ -1,4 +1,4 @@
-import {Markup, Telegraf} from "telegraf";
+import {Context, Markup, Telegraf} from "telegraf";
 import {startHandler} from "@/bot/handlers/start";
 import {helpHandler} from "@/bot/handlers/help";
 import {addListeningWordsHandler} from "@/bot/handlers/addListeningWords";
@@ -30,7 +30,11 @@ import {
     getConfirmDeleteListWordsKeyboard,
     getDeleteListWordsKeyboard
 } from "@/bot/keyboards/getDeleteListWordsKeyboard";
-import {sendDatabaseFileHandler} from "@/bot/handlers/sendDatabaseFile";
+import {isAdmin, sendDatabaseFileHandler} from "@/bot/handlers/sendDatabaseFile";
+import axios from "axios";
+import * as fs from "fs";
+import {uuid} from "uuidv4";
+import {deletePhotoInCatDirectory, getRandomCatPhotoHandler, saveCatPhotoHandler} from "@/bot/handlers/catsHandlers";
 
 const token = process.env.BOT_TOKEN
 const adminId = getAdminId()
@@ -57,9 +61,14 @@ export const bot = new Telegraf(process.env.BOT_TOKEN)
 bot.start(startHandler);
 bot.help(helpHandler);
 bot.command('list', listListeningWordHandler);
-bot.command("database", sendDatabaseFileHandler)
+bot.command("database", sendDatabaseFileHandler);
+bot.command("cat", getRandomCatPhotoHandler)
 bot.hears(new RegExp('/delete_\\d+'), (ctx) => deleteListeningWordHandler(ctx, ctx.message.text))
 bot.on('text', (ctx) => addListeningWordsHandler(ctx, ctx.message.text))
+
+bot.on("photo", (ctx) => {
+    saveCatPhotoHandler(ctx, ctx.message.photo)
+})
 
 bot.action(/^restore-(.*?)$/, async (ctx) => {
     const matchedWord = ctx.match[1]
@@ -104,6 +113,21 @@ bot.action(/^delete-(\d+)$/, async (ctx) => {
 
     } catch (e) {
         return ctx.answerCbQuery(errorMessageCallbackQuery)
+    }
+})
+
+bot.action(/^del-cyprocat-(.*?)$/, async (ctx) => {
+    if (!isAdmin(ctx.from.id)) {
+        return
+    }
+    const id = ctx.match[1]
+    console.log({id})
+    try {
+        await deletePhotoInCatDirectory(id)
+        ctx.editMessageReplyMarkup(undefined)
+        return ctx.answerCbQuery(wrapSuccessMessage(`Изображение удалено`))
+    } catch (e) {
+        return ctx.answerCbQuery(wrapErrorMessage(`Не удалось удалить изображение`))
     }
 })
 
