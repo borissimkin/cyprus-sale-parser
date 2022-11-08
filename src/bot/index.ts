@@ -1,4 +1,4 @@
-import {Context, Markup, Telegraf} from "telegraf";
+import {Markup, Telegraf} from "telegraf";
 import {startHandler} from "@/bot/handlers/start";
 import {helpHandler} from "@/bot/handlers/help";
 import {addListeningWordsHandler} from "@/bot/handlers/addListeningWords";
@@ -9,7 +9,7 @@ import {errorMessageCallbackQuery} from "@/bot/messages/errorMessage";
 import {
     addUniqueListeningWords,
     findUserByTelegramId,
-    getListeningWordById, ListeningWord,
+    getListeningWordById,
     removeListeningListWords,
     removeListeningWord
 } from "@/database";
@@ -25,7 +25,6 @@ import {
     createListListeningWords,
     createListListeningWordWithoutDeleteCommand
 } from "@/bot/utils/createListListeningWords";
-import {getRestoreWordsKeyboard} from "@/bot/keyboards/getRestoreWordsKeyboard";
 import {
     getConfirmDeleteListWordsKeyboard,
     getDeleteListWordsKeyboard
@@ -37,9 +36,9 @@ import {
     getRandomCatPhotoHandler,
     saveCatPhotoHandler
 } from "@/bot/handlers/catsHandlers";
-import {getDeleteCatPhotoKeyboard} from "@/bot/keyboards/getDeleteCatPhotoKeyboard";
 import path from "path";
 import {getShowMoreCatPhotoKeyboard} from "@/bot/keyboards/getShowMoreCatPhotoKeyboard";
+import {sendMessageAdminSomeCatGod} from "@/bot/utils/sendMessageAdminSomeCatGod";
 
 const token = process.env.BOT_TOKEN
 const adminId = getAdminId()
@@ -149,6 +148,11 @@ bot.action(/^show-more-cats-(\d+)$/, async (ctx) => {
     } catch (e) {
         await ctx.reply("Произошла какая-то ошибка, киприкота не будет 😭")
         ctx.editMessageReplyMarkup(undefined)
+    }
+    try {
+        return sendMessageAdminSomeCatGod(nextCount, ctx)
+    } catch (e) {
+        loggerHandleError("Не удалось отправить сообщение котофила")
     }
 })
 

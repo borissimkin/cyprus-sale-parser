@@ -33,7 +33,7 @@ const getTextUnblockedUser = (name: string | number) => {
     return `😁 Пользователь ${name} вернулся в родную гавань.`
 }
 
-const getUserName = (user: Context['from']) => {
+export const getUserName = (user: Context['from']) => {
     const name = [user.first_name, user.last_name].filter(Boolean).join(" ")
     if (name) {
         return name

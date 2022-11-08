@@ -4,7 +4,8 @@ export const helpAddListeningWordMessage = "Чтобы отслеживать о
     "<b>Например:</b> iphone, scooter, бесплатно, самокат, ноутбук, макбук, macbook, лимассол, бронь\n"
 
 export const listOfAllowedCommands = "<b>Доступные команды:\n</b>/list - Показать список ваших отслеживаемых слов.\n" +
-    "/help - Информация об использовании бота."
+    "/help - Информация об использовании бота.\n" +
+    "/cat - Показать киприкота."
 
 export const someAdditionalInfo = "<b>При вводе отслеживаемых слов регистр не учитывается.</b>"
 
