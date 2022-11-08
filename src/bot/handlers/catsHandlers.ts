@@ -5,6 +5,8 @@ import fs, {unlink} from "fs";
 import {PhotoSize} from "typegram/message";
 import {getDeleteCatPhotoKeyboard} from "@/bot/keyboards/getDeleteCatPhotoKeyboard";
 import {uuid} from "uuidv4";
+import {getShowMoreCatPhotoKeyboard} from "@/bot/keyboards/getShowMoreCatPhotoKeyboard";
+import path from "path";
 
 const catsDirectory = "src/cat_assets"
 
@@ -19,12 +21,13 @@ export const saveCatPhotoHandler = async (ctx: Context, photos: PhotoSize[]) => 
         const response = await axios({url: link.href, responseType: "stream"});
         const fileName = `${uuid()}.jpg`
         response.data.pipe(
-            fs.createWriteStream(`${catsDirectory}/${fileName}`),
+            fs.createWriteStream(getFullPathToCatImage(fileName)),
         ).on('finish', async () => {
             try {
-                await ctx.replyWithPhoto({source: `${catsDirectory}/${fileName}`}, {...Markup.inlineKeyboard(getDeleteCatPhotoKeyboard(fileName)) })
+                await ctx.replyWithPhoto({source: getFullPathToCatImage(fileName)}, {...Markup.inlineKeyboard(getDeleteCatPhotoKeyboard(fileName)) })
                 await ctx.reply("Фото киприкота загружено", {disable_notification: true})
             } catch (e) {
+                console.log(e)
                 await ctx.reply("Что то пошло не так на этапе отправки сообщения с фоткой", {disable_notification: true})
             }
         }).on('error', () => {
@@ -43,14 +46,26 @@ const getFilesInCatsDirectory = () => {
     });
 }
 
-export const getRandomCatPhotoHandler = async (ctx: Context) => {
-    const files = await getFilesInCatsDirectory() as Array<unknown>
+export const getRandomCatPhotoFileName = async (): Promise<string | null> => {
+    const files = await getFilesInCatsDirectory() as Array<string>
+
     if (!files.length) {
+        return null
+    }
+    return files[Math.floor(Math.random() * files.length)];
+}
+
+export const getFullPathToCatImage = (fileName: string): string => {
+    return `${catsDirectory}/${fileName}`
+}
+
+export const getRandomCatPhotoHandler = async (ctx: Context) => {
+    const fileName = await getRandomCatPhotoFileName()
+    if (!fileName) {
         return ctx.reply("Еще нет фотографий киприкотов 🥺")
     }
-    const randomCatPhotoPath = files[Math.floor(Math.random() * files.length)];
     try {
-        await ctx.replyWithPhoto({source: `${catsDirectory}/${randomCatPhotoPath}`})
+        await ctx.replyWithPhoto({source: getFullPathToCatImage(fileName)}, {...Markup.inlineKeyboard(getShowMoreCatPhotoKeyboard(0)) })
     } catch (e) {
         await ctx.reply("Произошла какая-то ошибка, киприкота не будет 😭")
     }

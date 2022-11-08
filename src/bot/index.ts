@@ -31,10 +31,15 @@ import {
     getDeleteListWordsKeyboard
 } from "@/bot/keyboards/getDeleteListWordsKeyboard";
 import {isAdmin, sendDatabaseFileHandler} from "@/bot/handlers/sendDatabaseFile";
-import axios from "axios";
-import * as fs from "fs";
-import {uuid} from "uuidv4";
-import {deletePhotoInCatDirectory, getRandomCatPhotoHandler, saveCatPhotoHandler} from "@/bot/handlers/catsHandlers";
+import {
+    deletePhotoInCatDirectory, getFullPathToCatImage,
+    getRandomCatPhotoFileName,
+    getRandomCatPhotoHandler,
+    saveCatPhotoHandler
+} from "@/bot/handlers/catsHandlers";
+import {getDeleteCatPhotoKeyboard} from "@/bot/keyboards/getDeleteCatPhotoKeyboard";
+import path from "path";
+import {getShowMoreCatPhotoKeyboard} from "@/bot/keyboards/getShowMoreCatPhotoKeyboard";
 
 const token = process.env.BOT_TOKEN
 const adminId = getAdminId()
@@ -121,13 +126,29 @@ bot.action(/^del-cyprocat-(.*?)$/, async (ctx) => {
         return
     }
     const id = ctx.match[1]
-    console.log({id})
     try {
         await deletePhotoInCatDirectory(id)
         ctx.editMessageReplyMarkup(undefined)
         return ctx.answerCbQuery(wrapSuccessMessage(`Изображение удалено`))
     } catch (e) {
         return ctx.answerCbQuery(wrapErrorMessage(`Не удалось удалить изображение`))
+    }
+})
+
+bot.action(/^show-more-cats-(\d+)$/, async (ctx) => {
+    const count = ctx.match[1]
+    const fileName = await getRandomCatPhotoFileName()
+    if (!fileName) {
+        ctx.editMessageReplyMarkup(undefined)
+        return ctx.answerCbQuery("Больше нет фотографий киприкотов 🥺")
+    }
+    const nextCount = Number(count) + 1
+    try {
+        await ctx.editMessageMedia({ type: "photo", media: {source: path.resolve(getFullPathToCatImage(fileName))} },
+            {...Markup.inlineKeyboard(getShowMoreCatPhotoKeyboard(nextCount)) })
+    } catch (e) {
+        await ctx.reply("Произошла какая-то ошибка, киприкота не будет 😭")
+        ctx.editMessageReplyMarkup(undefined)
     }
 })
 

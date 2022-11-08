@@ -1,4 +1,3 @@
-import {ListeningWord} from "@/database";
 import {Markup} from "telegraf";
 
 export const getDeleteCatPhotoKeyboard = (fileName: string) => {
