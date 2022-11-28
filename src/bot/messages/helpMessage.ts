@@ -1,6 +1,6 @@
 import {getUrlParsedChats} from "@/telegramClient/utils";
 
-export const helpAddListeningWordMessage = "Чтобы отслеживать определенные категории сообщений, просто введите слово или слова через запятую.\n\n" +
+export const helpAddListeningWordMessage = "Чтобы отслеживать определенные слова в сообщениях, просто введите слово или слова через запятую.\n\n" +
     "<b>Например:</b> iphone, scooter, бесплатно, самокат, ноутбук, макбук, macbook, лимассол, бронь\n"
 
 export const listOfAllowedCommands = "<b>Доступные команды:\n</b>/list - Показать список ваших отслеживаемых слов.\n" +

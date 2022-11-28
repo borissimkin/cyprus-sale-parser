@@ -15,7 +15,7 @@ export const listListeningWordHandler = async (ctx: Context) => {
     const listeningWords = user.listeningWords
     if (!listeningWords.length) {
         const message = "🫤 У вас еще нет отслеживаемых слов.\n\n"
-        return ctx.reply(`${message}${helpAddListeningWordMessage}`, {parse_mode: "Markdown"})
+        return ctx.reply(`${message}${helpAddListeningWordMessage}`, {parse_mode: "HTML"})
     }
     const message = `Список отслеживаемых слов (${listeningWords.length}):\n${createListListeningWords(listeningWords)}`
     return ctx.reply(message, {...Markup.inlineKeyboard(getDeleteListWordsKeyboard())})
