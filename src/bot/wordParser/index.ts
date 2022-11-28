@@ -1,4 +1,4 @@
-import {ListeningWord, toBlockedUser, User, UserRepository} from "@/database";
+import {ListeningWord, toBlockedUser, updateUpdatedAt, User, UserRepository} from "@/database";
 import {bot} from "@/bot";
 import {NewMessageEvent} from "telegram/events";
 import {Markup} from "telegraf";
@@ -47,6 +47,7 @@ const sendMessageMatched = async (user: User, message: Message, word: ListeningW
     try {
         await bot.telegram.sendMessage(user.telegramId, createMatchedMessageText(word.word, message),
             {...Markup.inlineKeyboard(getDeleteWordKeyboard(word)), parse_mode: "HTML"})
+        return updateUpdatedAt(user)
     } catch (e) {
         if (e?.response?.error_code === 403) {
             await toBlockedUser(user)

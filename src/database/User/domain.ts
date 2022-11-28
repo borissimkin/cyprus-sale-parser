@@ -1,4 +1,5 @@
 import {User, UserRepository} from "@/database";
+import {loggerHandleError} from "@/logger";
 
 export const findUserByTelegramId = (telegramId: number) => {
     return UserRepository().findOne({where: {telegramId}, relations: ['listeningWords']})
@@ -25,5 +26,20 @@ export const toBlockedUser = async (user: User) => {
 export const toUnblockedUser = async (user: User) => {
     const repository = UserRepository()
     user.isBlocked = null
+    return repository.save(user)
+}
+
+export const updateActivityUser = async (telegramId: number) => {
+    try {
+        const user = await findUserByTelegramId(telegramId)
+        await updateUpdatedAt(user)
+    } catch (e) {
+        loggerHandleError("Не удалось обновить updatedAt пользователя")
+    }
+}
+
+export const updateUpdatedAt = async (user: User) => {
+    const repository = UserRepository()
+    user.updatedAt = new Date()
     return repository.save(user)
 }

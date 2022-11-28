@@ -6,7 +6,11 @@ const infoMessages: string[] = [
     "нужно указывать цену,город, краткое описание. Если отдаете, указывайте, что",
     "Прочитайте правила закреплённые сверху",
     "За не соблюдение правил бан",
-    "you were banned"
+    "you were banned",
+    "cyprusnarco",
+    "narcocyprus",
+    "cyprusnarko",
+    "narkocyprus"
 ].map((info) => info.toLowerCase())
 
 export const isSomeNotImportantMessage = (text: string) => {

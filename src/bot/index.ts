@@ -11,7 +11,7 @@ import {
     findUserByTelegramId,
     getListeningWordById,
     removeListeningListWords,
-    removeListeningWord
+    removeListeningWord, updateActivityUser
 } from "@/database";
 import {wrapErrorMessage, wrapSuccessMessage} from "@/bot/messages/wrapMessages";
 import {getUniqueWords} from "@/bot/utils/getUniqueWordsUser";
@@ -50,17 +50,15 @@ if (!adminId) {
 if (token === undefined) {
     throw new Error('BOT_TOKEN must be provided!')
 }
-//todo: убрать id из команды удаления
-/**
- * команды:
- * - текст (добавить слова)
- * - /list список отслеживаемых слов
- * - /del_{id} - удалить слово
- *  /clear (этот функционал в кнопку /list) - Очистить весь список отслеживаемых слов (todo: добавить в колбек квери
- *  чтобы вернуть все отслеживаемые слова обратно)
- * **/
 
 export const bot = new Telegraf(process.env.BOT_TOKEN)
+
+
+bot.use(async (ctx, next) => {
+    updateActivityUser(ctx.from.id)
+    return next() // runs next middleware
+})
+
 
 bot.start(startHandler);
 bot.help(helpHandler);
