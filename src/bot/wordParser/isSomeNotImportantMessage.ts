@@ -10,7 +10,8 @@ const infoMessages: string[] = [
     "cyprusnarco",
     "narcocyprus",
     "cyprusnarko",
-    "narkocyprus"
+    "narkocyprus",
+    "СООБЩЕНИЕ ОТ АДМИНА"
 ].map((info) => info.toLowerCase())
 
 export const isSomeNotImportantMessage = (text: string) => {

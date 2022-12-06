@@ -12,6 +12,8 @@ const apiId = process.env.API_ID;
 const apiHash = process.env.API_HASH;
 const chatId = getUrlParsedChats()
 
+const someBullshitSenderId: number[] = [1782503645]
+
 
 if ([apiHash, apiId, chatId].some((x) =>!x)) {
     throw new Error("CHECK THE ENV!")
@@ -33,6 +35,10 @@ export const startTelegramClientParser = async () => {
     console.log("Telegram Client is running");
 
     async function handler(event: NewMessageEvent, urlChatId: string) {
+        const senderId = event.message.sender.id
+        if (someBullshitSenderId.includes(Number(senderId))) {
+            return
+        }
         return handleMessageFromParsedChat(event, urlChatId)
     }
     console.log(chatId)
