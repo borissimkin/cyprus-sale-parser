@@ -1,11 +1,11 @@
 import {Context} from "telegraf";
 import {
-    chatsForParseMessage,
+    chatsForParseMessage, dontBeatMeMessage,
     feedbackMessage,
     helpAddListeningWordMessage,
     listOfAllowedCommands,
-    someAdditionalInfo
-} from "@/bot/messages/helpMessage";
+    someAdditionalInfo,
+} from '@/bot/messages/helpMessage'
 
 
 export const helpHandler = (ctx: Context) => {
@@ -13,5 +13,5 @@ export const helpHandler = (ctx: Context) => {
 }
 
 export const getHelpMessage = () => {
-    return `${helpAddListeningWordMessage}\n${someAdditionalInfo}\n\n${listOfAllowedCommands}\n\n${feedbackMessage}\n\n${chatsForParseMessage()}`
+    return `${helpAddListeningWordMessage}\n${someAdditionalInfo}\n\n${listOfAllowedCommands}\n\n${feedbackMessage}\n\n${dontBeatMeMessage}\n\n${chatsForParseMessage()}`
 }
