@@ -12,6 +12,9 @@ export class User {
     @OneToMany(() => ListeningWord, (listeningWord) => listeningWord.user)
     listeningWords: ListeningWord[]
 
+    @Column({nullable: true})
+    receivedAdvertiseAt: Date
+
     @CreateDateColumn()
     createdAt: Date;
 

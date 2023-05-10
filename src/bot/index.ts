@@ -1,4 +1,4 @@
-import {Markup, Telegraf} from "telegraf";
+import { Markup, Scenes, session, Telegraf } from 'telegraf'
 import {startHandler} from "@/bot/handlers/start";
 import {helpHandler} from "@/bot/handlers/help";
 import {addListeningWordsHandler} from "@/bot/handlers/addListeningWords";
@@ -39,6 +39,7 @@ import {
 import path from "path";
 import {getShowMoreCatPhotoKeyboard} from "@/bot/keyboards/getShowMoreCatPhotoKeyboard";
 import {sendMessageAdminSomeCatGod} from "@/bot/utils/sendMessageAdminSomeCatGod";
+import { advertiseScene, advertiseSceneId } from '@/bot/advertisement/handlers'
 
 const token = process.env.BOT_TOKEN
 const adminId = getAdminId()
@@ -53,15 +54,28 @@ if (token === undefined) {
 
 export const bot = new Telegraf(process.env.BOT_TOKEN)
 
+// @ts-ignore
+const stage = new Scenes.Stage([advertiseScene]);
+
+bot.use(session());
+bot.use(stage.middleware());
+// @ts-ignore
+stage.register(advertiseScene);
 
 bot.use(async (ctx, next) => {
     updateActivityUser(ctx.from.id)
     return next() // runs next middleware
 })
 
-
 bot.start(startHandler);
 bot.help(helpHandler);
+bot.command("advert", (ctx) => {
+    if (!isAdmin(ctx.from.id)) {
+        return loggerHandleError(`/advert restricted userId=${ctx.from.id}`)
+    }
+    // @ts-ignore
+    ctx.scene.enter(advertiseSceneId)
+})
 bot.command('list', listListeningWordHandler);
 bot.command("database", sendDatabaseFileHandler);
 bot.command("cat", getRandomCatPhotoHandler)

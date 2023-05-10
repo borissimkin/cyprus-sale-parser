@@ -29,6 +29,12 @@ export const toUnblockedUser = async (user: User) => {
     return repository.save(user)
 }
 
+export const getUnblockedUsers = () => {
+    const rep = UserRepository()
+
+    return rep.find({where: {isBlocked: null}})
+}
+
 export const updateActivityUser = async (telegramId: number) => {
     try {
         const user = await findUserByTelegramId(telegramId)
