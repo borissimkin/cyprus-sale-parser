@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { Context, Markup, Scenes } from 'telegraf'
 import lodash, { cloneDeep } from 'lodash'
-import { getUnblockedUsers, toBlockedUser, UserRepository } from '@/database'
+import { getUnblockedUsers, toBlockedUser, USER_BASE_LIMIT, UserRepository } from '@/database'
 import { loggerHandleError } from '@/logger'
 import { splitToChunks } from '@/helpers'
 import { In, IsNull } from 'typeorm'
@@ -43,6 +43,17 @@ const baseButtons = [cancelButton]
 const createProgressMessage = (countAllUsers: number, currentProgress: number, currentDate: string) => {
   return `Отправлено ${currentProgress} из ${countAllUsers}!\nПоследнее обновление: ${currentDate}`
 }
+
+const getUsers = (skip: number = 0) => {
+  return UserRepository().findAndCount({
+    where: {
+      isBlocked: IsNull()
+    },
+    skip,
+    take: USER_BASE_LIMIT,
+    select: ["telegramId", "id"]
+  })
+}
 // todo: СДЕЛАТЬ ЧАНКИ СРАЗУ ПО БАЗЕ А ТАКЖЕ НЕ ЗАБИТЬ ЭТО СДЕЛАТЬ В САМОМ МОДУЛЕ ПАРСИНГА
 // todo: сделать шаг, выбор реклама или просто объявление в бота
 // todo: добавить команды для админа в хелп
@@ -63,33 +74,22 @@ export const advertiseScene = new Scenes.WizardScene(
 
     await ctx.reply("Получаю список доступных пользователей...")
     try {
-      const [users, countUsers] = await UserRepository().findAndCount({
-        where: {
-          isBlocked: IsNull()
-        },
-        select: ["telegramId", "id"]
-      })
+      const [_, countUsers] = await getUsers()
 
-      console.log(users)
       await ctx.reply(`Пользователи получены. Всего ${countUsers}`)
-      if (!users.length || !countUsers) {
+      if (!countUsers) {
         await ctx.reply("Пользователей 0, выходим!")
         return ctx.scene.leave()
       }
-      await ctx.reply("Разбиваю на чанки...")
-      const splitChunks = 1 // todo: 10
-
-      const chunkedUsers =  lodash.chunk(users, splitChunks)
-
       await ctx.reply("Начинаю рассылку...")
 
       let currentProgressNumber = 0
 
       const progressMessage = await ctx.reply(createProgressMessage(countUsers, currentProgressNumber, new Date()))
 
-
-      await Promise.all(chunkedUsers.map(async (currentChunk) => {
-        await Promise.all(currentChunk.map(async (user) => {
+      for (let i = 0; i <= countUsers; i += USER_BASE_LIMIT) {
+        const [users] = await getUsers(i)
+        await Promise.all(users.map(async (user) => {
           try {
             await ctx.copyMessage(user.telegramId)
           } catch (e) {
@@ -103,17 +103,22 @@ export const advertiseScene = new Scenes.WizardScene(
             }
           }
         }))
-        currentProgressNumber += currentChunk.length
-        await ctx.telegram.editMessageText(
-          ctx.chat.id,
-          progressMessage.message_id,
-          undefined,
-          createProgressMessage(countUsers, currentProgressNumber, new Date())
-        )
+        currentProgressNumber += users.length
+        try {
+          await ctx.telegram.editMessageText(
+            ctx.chat.id,
+            progressMessage.message_id,
+            undefined,
+            createProgressMessage(countUsers, currentProgressNumber, new Date())
+          )
+        } catch (e) {
+          loggerHandleError(e)
+        }
+
         await UserRepository()
-          .update({ id: In(currentChunk.map(({id}) => id)) },
+          .update({ id: In(users.map(({id}) => id)) },
             { receivedAdvertiseAt: new Date() })
-      }))
+      }
 
       await ctx.reply("Рассылка прошла успешно!")
       await ctx.scene.leave()

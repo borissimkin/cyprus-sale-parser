@@ -1,5 +1,8 @@
 import {User, UserRepository} from "@/database";
 import {loggerHandleError} from "@/logger";
+import { TelegramUserInfo } from '@/types/TelegramUserInfo'
+
+export const USER_BASE_LIMIT = 6 // 100
 
 export const findUserByTelegramId = (telegramId: number) => {
     return UserRepository().findOne({where: {telegramId}, relations: ['listeningWords']})
@@ -38,6 +41,9 @@ export const getUnblockedUsers = () => {
 export const updateActivityUser = async (telegramId: number) => {
     try {
         const user = await findUserByTelegramId(telegramId)
+        if (!user) {
+            return
+        }
         await updateUpdatedAt(user)
     } catch (e) {
         loggerHandleError("Не удалось обновить updatedAt пользователя")
