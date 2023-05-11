@@ -26,7 +26,7 @@ export const unblockUserHandler = (ctx: Context) => {
 }
 
 const getTextNewUser = (name: string | number) => {
-    return `👤 Зарегистировался новый пользователь🥺 - ${name}`
+    return `👤 Зарегистрировался новый пользователь🥺 - ${name}`
 }
 
 const getTextUnblockedUser = (name: string | number) => {

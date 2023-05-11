@@ -7,12 +7,12 @@ import {deleteListeningWordHandler} from "@/bot/handlers/deleteListeningWord";
 import {getAdminId} from "@/bot/utils/getAdminId";
 import {errorMessageCallbackQuery} from "@/bot/messages/errorMessage";
 import {
-    addUniqueListeningWords,
+    addUniqueListeningWords, findUserAndUpdateTelegramInfo,
     findUserByTelegramId,
     getListeningWordById,
     removeListeningListWords,
-    removeListeningWord, updateActivityUser
-} from "@/database";
+    removeListeningWord, updateActivityUser,
+} from '@/database'
 import {wrapErrorMessage, wrapSuccessMessage} from "@/bot/messages/wrapMessages";
 import {getUniqueWords} from "@/bot/utils/getUniqueWordsUser";
 import {filterWordsByLimitAllows} from "@/bot/utils/limitListenningWords";
@@ -63,6 +63,7 @@ bot.use(stage.middleware());
 stage.register(advertiseScene);
 
 bot.use(async (ctx, next) => {
+    findUserAndUpdateTelegramInfo(ctx.from.id, ctx.from)
     updateActivityUser(ctx.from.id)
     return next() // runs next middleware
 })

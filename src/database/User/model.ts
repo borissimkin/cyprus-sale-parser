@@ -21,6 +21,22 @@ export class User {
     @Column({nullable: true})
     isPremium: boolean
 
+
+    @Column({nullable: true})
+    firstName: string
+
+    @Column({nullable: true})
+    lastName: string
+
+    @Column({nullable: true})
+    username: string
+
+    @Column({nullable: true})
+    languageCode: string
+
+    @Column({nullable: true})
+    isTelegramPremium: boolean;
+
     @UpdateDateColumn()
     updatedAt: Date;
 }
