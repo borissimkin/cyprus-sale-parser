@@ -2,7 +2,7 @@ import {User, UserRepository} from "@/database";
 import {loggerHandleError} from "@/logger";
 import { TelegramUserInfo } from '@/types/TelegramUserInfo'
 
-export const USER_BASE_LIMIT = 6 // 100
+export const USER_BASE_LIMIT = 100
 
 export const findUserByTelegramId = (telegramId: number) => {
     return UserRepository().findOne({where: {telegramId}, relations: ['listeningWords']})

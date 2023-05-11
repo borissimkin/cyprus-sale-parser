@@ -1,9 +1,7 @@
 // @ts-nocheck
 import { Context, Markup, Scenes } from 'telegraf'
-import lodash, { cloneDeep } from 'lodash'
-import { getUnblockedUsers, toBlockedUser, USER_BASE_LIMIT, UserRepository } from '@/database'
+import { toBlockedUser, USER_BASE_LIMIT, UserRepository } from '@/database'
 import { loggerHandleError } from '@/logger'
-import { splitToChunks } from '@/helpers'
 import { In, IsNull } from 'typeorm'
 
 export const advertiseSceneId = "ADVERTISE_SCENE_ID"
@@ -22,19 +20,6 @@ const handleCancel = async (ctx: Context) => {
 
   return ctx.reply("Отменяю!")
 }
-
-/**
- * команда /advert
- * Заходит в диалог, и ожидает сообщение - в диалоге кнопка "Отмена"  для выхода
- * После отправки сообщения, идет уточнение нужно ли добавлять кнопки (Кнопки диалога: Да, нет, отмена)
- * Если нет, то пересылаем это же сообщение и текст Подтвердите отправку данного рекламного сообщения (ПОДТВЕРДИТЬ, Отмена)
- * Если да, то Текст (напишите текст кнопки в формате: [[{text: "awdawd", link: "https:/awdawd/"}]]
- * Если кнопки правильного формата, то переходим в состоние подтверждения отправки
- * Если неправильного то остаемся там же.
- *
- * Когда идет процесс отправки сообщения, отправляем сообщение "Рекламное сообщение отправляется: 1 из n пользователей" (изменять его через каждые N (100) пользователей),
- * По окончанию изменить его на "Рекламное сообщение отправлено успешно"
- * **/
 
 const cancelButton = Markup.button.text(advertiseSceneMessages.cancel)
 
