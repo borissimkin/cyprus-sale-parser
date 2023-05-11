@@ -27,7 +27,7 @@
     "module-alias": "^2.2.2",
     "reflect-metadata": "^0.1.13",
     "sqlite3": "^5.1.1",
-    "telegraf": "^4.9.2",
+    "telegraf": "^4.11.2",
     "telegram": "^2.11.5",
     "typeorm": "^0.3.10",
     "uuidv4": "^6.2.13",
