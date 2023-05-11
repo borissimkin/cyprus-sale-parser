@@ -35,8 +35,8 @@ export const startTelegramClientParser = async () => {
     console.log("Telegram Client is running");
 
     async function handler(event: NewMessageEvent, urlChatId: string) {
-        const senderId = event.message.sender.id
-        if (someBullshitSenderId.includes(Number(senderId))) {
+        const senderId = event.message?.sender?.id
+        if (senderId && someBullshitSenderId.includes(Number(senderId))) {
             return
         }
         return handleMessageFromParsedChat(event, urlChatId)
