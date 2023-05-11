@@ -46,7 +46,6 @@ const getDeleteWordId = (command: string): Nullable<number> => {
     }
 }
 
-// todo: инлайн кнопка с ундо операцией
 const sendSuccessMessage = (ctx: Context, word: string) => {
     return ctx.reply(wrapSuccessMessage(`Вы перестали отслеживать слово *${word}*`), {parse_mode: "Markdown"})
 }
