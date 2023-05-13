@@ -1,16 +1,16 @@
-import {ListeningWord, toBlockedUser, updateUpdatedAt, User, UserRepository} from "@/database";
+import { ListeningWord, toBlockedUser, updateUpdatedAt, User, USER_BASE_LIMIT, UserRepository } from '@/database'
 import {bot} from "@/bot";
 import {NewMessageEvent} from "telegram/events";
 import {Markup} from "telegraf";
 import {getDeleteWordKeyboard} from "@/bot/keyboards/getDeleteWordKeyboard";
-import {IsNull} from "typeorm";
+import {IsNull,Not } from "typeorm";
 import {loggerHandleError} from "@/logger";
 import {distance} from "fastest-levenshtein"
 import {isSomeNotImportantMessage} from "@/bot/wordParser/isSomeNotImportantMessage";
 
 // todo: оптимизировать алгоритм
 // todo: не делать запросы при каждом хендле сообщения
-
+// todo: take only users which have tracking words
 type Message = {
     id: number,
     text?: string
@@ -23,24 +23,42 @@ const getWordLength = (word: string) => {
     return word.split(separator).length
 }
 
+const TAKE = USER_BASE_LIMIT
+
+const getUsers = ({ skip = 0, take = TAKE }: { skip?: number, take?: number }) => {
+    return UserRepository().findAndCount({
+        where: {
+            isBlocked: IsNull()
+        },
+        relations: ['listeningWords'],
+        skip,
+        take,
+    })
+}
+
 export const handleMessageFromParsedChat = async (message: NewMessageEvent, urlChatId: string) => {
     const text = message.message.text
     if (!text || isSomeNotImportantMessage(text)) {
         return
     }
-    const userRepository = UserRepository()
-    const users = await userRepository.find({where: {isBlocked: IsNull()}, relations: ['listeningWords']})
     const messageAsArray = text.split(separator)
-    users.forEach((user) => {
-        const listeningWords = user?.listeningWords ?? []
-        for (const word of listeningWords) {
-            const isMatchedMessage = isMatchedMessageAndReturnProcessedMessage(word.word, text, messageAsArray)
-            if (isMatchedMessage) {
-                sendMessageMatched(user, {id: message.message.id, text: isMatchedMessage, chatId: urlChatId}, word, text)
-                return
+
+    const [_, countUsers] = await getUsers({take: 0})
+
+    for (let i = 0; i <= countUsers; i += TAKE) {
+        const [users] = await getUsers({skip: i})
+
+        users.forEach((user) => {
+            const listeningWords = user.listeningWords ?? []
+            for (const word of listeningWords) {
+                const isMatchedMessage = isMatchedMessageAndReturnProcessedMessage(word.word, text, messageAsArray)
+                if (isMatchedMessage) {
+                    sendMessageMatched(user, {id: message.message.id, text: isMatchedMessage, chatId: urlChatId}, word, text)
+                    break
+                }
             }
-        }
-    })
+        })
+    }
 }
 
 const sendMessageMatched = async (user: User, message: Message, word: ListeningWord, rawText: string) => {
