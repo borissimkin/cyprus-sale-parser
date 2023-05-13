@@ -39,7 +39,6 @@ const getUsers = (skip: number = 0) => {
     select: ["telegramId", "id"]
   })
 }
-// todo: СДЕЛАТЬ ЧАНКИ СРАЗУ ПО БАЗЕ А ТАКЖЕ НЕ ЗАБИТЬ ЭТО СДЕЛАТЬ В САМОМ МОДУЛЕ ПАРСИНГА
 // todo: сделать шаг, выбор реклама или просто объявление в бота
 // todo: добавить команды для админа в хелп
 export const advertiseScene = new Scenes.WizardScene(
