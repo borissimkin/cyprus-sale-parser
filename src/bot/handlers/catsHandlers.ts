@@ -14,6 +14,9 @@ export const saveCatPhotoHandler = async (ctx: Context, photos: PhotoSize[]) => 
     if (!isAdmin(ctx.from.id)) {
         return
     }
+    if (!fs.existsSync(catsDirectory)){
+        fs.mkdirSync(catsDirectory);
+    }
     const maxSize = Math.max(...photos.map((photo) => photo.file_size))
     const maxSizedPhoto = photos.find((photo) => photo.file_size >= maxSize)
     const link = await ctx.telegram.getFileLink(maxSizedPhoto.file_id)
